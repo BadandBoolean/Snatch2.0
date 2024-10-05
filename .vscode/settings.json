@@ -1,0 +1,7 @@
+{
+  "editor.wordWrap": "wordWrapColumn",
+  "rewrap.autoWrap.enabled": true,
+  "rewrap.wrappingColumn": 60,
+  "html.format.wrapLineLength": 60,
+  "prettier.proseWrap": "always"
+}
