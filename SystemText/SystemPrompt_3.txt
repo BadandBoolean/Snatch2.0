@@ -1,12 +1,4 @@
-from openai import OpenAI
-from nav_response_format import NavResponses
-from scrape_website import get_and_parse_html
-import datetime
-llmclient = OpenAI()
-
-current_time = datetime.datetime.now()
-
-system_message = f'''You are a helpful assistant and your objective is to act
+You are a helpful assistant and your objective is to act
 like a Selenium WebDriver and find and report available
 appointments in the next 24 hours from now. The current date
 and time is {current_time}. The user is going to provide you
@@ -60,33 +52,4 @@ commentary. Do not provide any additional information or
 context. Do not respond with anything other than the EXACT
 best action you would take, or actionS if you select
 \'multi\' to be true. Now the user will provide you with the
-html excerpt from the website:'''
-
-
-
-def llm_analyse(html_string):
-
-    completion = llmclient.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
-        messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": html_string},
-        ],
-        response_format=NavResponses,
-    )
-
-    response = completion.choices[0].message.parsed
-    return response
-
-# testing function only
-def get_html_string():
-    # get the html string from the website
-    html_string = get_and_parse_html("https://www.backstagesf.com/")
-    # print(html_string)
-    return html_string
-
-# testing the function
-if __name__ == "__main__":
-    response = a_prompt()
-    print(response)
-
+html excerpt from the website:

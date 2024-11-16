@@ -1,5 +1,4 @@
-
-# scrape a website for appointments, up to 48 hours from now. 
+# scrape a website for appointments, up to 48 hours from now.
 
 from selenium import webdriver
 import time
@@ -11,13 +10,40 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parse_html import parse_html
 
-def get_landing_page_html(url):
-    # set up 
+
+# The main function that uses ThreadPoolExecutor
+def foo():
+    print("Main Thread: Starting the iterative process")
+    # Initial HTML string
+    initial_html_string = "<html><body><p>Initial content</p></body></html>"
+    # Using ThreadPoolExecutor
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        # Let's assume foo() submits multiple iterative_functions
+        for i in range(3):  # For example, starting 3 tasks
+            future = executor.submit(iterative_function, executor, initial_html_string)
+            futures.append(future)
+        # Collect results from futures
+        results = []
+        for future in as_completed(futures):
+            res = future.result()
+            if res:
+                results.extend(res)
+    print("Main Thread: Iterative process has completed")
+    print("Main Thread: Collected results:", results)
+
+
+def set_up_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument('--ignore-ssl-errors=yes')
-    options.add_argument('--ignore-certificate-errors')
+    options.add_argument("--ignore-ssl-errors=yes")
+    options.add_argument("--ignore-certificate-errors")
+    # options.add_argument("--headless") # make it not visible, just comment if you like seeing opened browsers
     driver = webdriver.Chrome(options=options)
-    driver.get(url)
+    return driver
+
+
+"""
+def get_and_parse_html(driver):
     wait = WebDriverWait(driver, 120)
     # get page source
     main_html = driver.execute_script("return document.documentElement.outerHTML;")
@@ -25,12 +51,24 @@ def get_landing_page_html(url):
     parsed_html = parse_html(main_html)
     return parsed_html
 
+"""
 
+
+def get_and_parse_html(page):
+    main_html = page.evaluate("document.documentElement.outerHTML")
+    parsed_html = parse_html(main_html)
+    return parsed_html
+
+
+def get_and_parse_html_from_html(html):
+    parsed_html = parse_html(html)
+    return parsed_html
 
 
 # for testing!!!
 if __name__ == "__main__":
-    # set up 
+    # set up
+    """
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-ssl-errors=yes')
     options.add_argument('--ignore-certificate-errors')
@@ -51,13 +89,13 @@ if __name__ == "__main__":
     # wait a bit
     time.sleep(2)
 
-    '''
-    # get all the html agian 
+    """
+    # get all the html agian
     body_html = driver.execute_script("return document.body.outerHTML;")
-    # write it to a file 
+    # write it to a file
     with open("body_html.html", "w") as f:
         f.write(body_html)
-    '''
+    """
 
     element = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@id='react-select-2-option-0']")))
     element.click()
@@ -96,38 +134,58 @@ if __name__ == "__main__":
 
 
 
-    '''
-    # find + wait to be clickable 
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-title='Stylists']")))
+    """
+    # find + wait to be clickable
+    button_to_press = wait.until(
+        EC.element_to_be_clickable((By.XPATH, "//a[@data-title='Stylists']"))
+    )
     # get href
-    href_to_go_to = button_to_press.get_attribute('href')
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
-    
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Book an Appointment')]")))
-    href_to_go_to = button_to_press.get_attribute('href')
+
+    button_to_press = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//a[contains(text(), 'Book an Appointment')]")
+        )
+    )
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
 
     driver.back()
 
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'rodneyrbarney.fullslate.com')]")))
-    href_to_go_to = button_to_press.get_attribute('href')
+    button_to_press = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//a[contains(@href, 'rodneyrbarney.fullslate.com')]")
+        )
+    )
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
 
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/services/1')]")))
-    href_to_go_to = button_to_press.get_attribute('href')
+    button_to_press = wait.until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/services/1')]"))
+    )
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
 
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'start=6113')]")))
-    href_to_go_to = button_to_press.get_attribute('href')
+    button_to_press = wait.until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'start=6113')]"))
+    )
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
 
-    button_to_press = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/book?day=6113&services%5B%5D=1&time=43200')]")))
-    href_to_go_to = button_to_press.get_attribute('href')
+    button_to_press = wait.until(
+        EC.element_to_be_clickable(
+            (
+                By.XPATH,
+                "//a[contains(@href, '/book?day=6113&services%5B%5D=1&time=43200')]",
+            )
+        )
+    )
+    href_to_go_to = button_to_press.get_attribute("href")
     driver.get(href_to_go_to)
-
 
     time.sleep(20)
-    '''
+    """
 
     
 
@@ -138,54 +196,46 @@ if __name__ == "__main__":
 
 
 
-    '''
+    """
     # Step 2: Click the "Click Here To Book Online" button/link
     # Wait until the link is clickable
-    
+
     book_online_button = driver.find_element(By.LINK_TEXT, "CLICK HERE TO BOOK ONLINE")
     # tell driver to get the href of the link in the button
-    book_online_button_href = book_online_button.get_attribute('href')
+    book_online_button_href = book_online_button.get_attribute("href")
     # tell driver to go to the href
     driver.get(book_online_button_href)
 
     print(driver.current_url)
     start = time.time()
-    wait = WebDriverWait(driver, 120) # this doesn't actually wait yet
-    wait.until(EC.url_contains('annakonyukova.glossgenius.com'))
+    wait = WebDriverWait(driver, 120)  # this doesn't actually wait yet
+    wait.until(EC.url_contains("annakonyukova.glossgenius.com"))
     end = time.time()
     print(end - start)
     start = time.time()
-    book_now_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//a[@href="/booking-flow" and text()="Book Now"]')))
+    book_now_button = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '//a[@href="/booking-flow" and text()="Book Now"]')
+        )
+    )
     end = time.time()
     print(end - start)
-    
 
-    book_now_button_href = book_now_button.get_attribute('href')
+    book_now_button_href = book_now_button.get_attribute("href")
     driver.get(book_now_button_href)
     print(driver.current_url)
     time.sleep(2)
 
-
-
-
-    
-
-
-    
-    
-    
-
-    
     test_url = "https://www.backstagesf.com/"
-    
+
     result = find_book_now_button(test_url)
-    
+
     if result:
         print("Success! Found a 'Book Now' element")
-        
+
     else:
         print("Test failed: No 'Book Now' element found.")
-        '''
+'''
 
 # we are actually going to make this into a state machine where the goal is to get to the state where time/date is on the screen. 
 
@@ -290,3 +340,4 @@ def recursive_middle_layer(element, driver):
     # Print the new URL
     print("New URL:", driver.current_url)
 
+'''

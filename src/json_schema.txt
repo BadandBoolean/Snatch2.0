@@ -1,0 +1,88 @@
+{
+  "name": "NavResponses",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "responses": {
+        "title": "Responses",
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/NavResponseFormat"
+        }
+      },
+      "datetimes": {
+        "title": "Datetimes",
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "responses",
+      "datetimes"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+      "NavResponseFormat": {
+        "title": "NavResponseFormat",
+        "type": "object",
+        "properties": {
+          "why": {
+            "title": "Why",
+            "type": "string"
+          },
+          "action": {
+            "title": "Action",
+            "type": [
+              "string"
+            ],
+            "enum": [
+              "Proceed",
+              "Report",
+              "Kill"
+            ]
+          },
+          "selector": {
+            "title": "Selector",
+            "type" : "string",
+            "enum": [
+              "role",
+              "alt_text",
+              "label",
+              "placeholder",
+              "test_id",
+              "text",
+              "title"
+            ]
+          },
+          "locator": {
+            "title": "Locator",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "multi": {
+            "title": "Multi",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "multi",
+          "why",
+          "action",
+          "locator",
+          "name",
+          "selector"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -1,13 +1,20 @@
 from pydantic import BaseModel
-from typing import Literal, Union
+from typing import List, Optional, Union, Literal
+
 
 class NavResponseFormat(BaseModel):
-    action: Union[Literal["Proceed", "Report", "Kill"], None] = None
-    method: Union[Literal["Click", "Navigate"], None] = None
-    xpath: Union[str, None] = None
-    attribute: Union[str, None] = None
-    datetimes: Union[list[str], None] = None
-    
-    class Config:
-        extra = "forbid"
+    why: str
+    action: Literal["Proceed", "Report", "Kill"]
+    selector: Literal["alt_text", "placeholder", "test_id", "text", "title", "xpath"]
+    locator: str
 
+    class Config:
+        extra = "forbid"  # Disallow additional properties
+
+
+class NavResponses(BaseModel):
+    html: List[str] = None
+    datetimes: List[str] = None
+
+    class Config:
+        extra = "forbid"  # Disallow additional properties
