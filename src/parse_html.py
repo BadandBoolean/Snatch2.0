@@ -10,6 +10,7 @@ redundant_keywords = [
     "instagram",
     "privacy policy",
     "terms",
+    "yelp",
     "facebook",
     "x.com",
     "cookies",
@@ -30,6 +31,11 @@ redundant_keywords = [
     'href="/favicon.ico"',
     'href="/_next/static',
     "<svg ",
+    "mailto:",
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
 ]
 
 clickable_element_tag_names = [
@@ -57,19 +63,22 @@ def get_clickable_elements_from_html(html_string):
     elements_list = []
 
     elements_with_tag_names = soup.find_all(clickable_element_tag_names)
+    return elements_with_tag_names
 
-    # Define a function to check for clickable attributes
-    def has_clickable_attribute(tag):
-        # has an attribute which is clickable. and also the
-
-        return any(tag.has_attr(attr) for attr in clickable_element_attr)
-
+    # TODO: figure out what we are going to do with this
     # Find elements with clickable attributes
-    elements_with_attributes = soup.find_all(has_clickable_attribute)
+    # elements_with_attributes = soup.find_all(has_clickable_attribute)
+    # all_elements = elements_with_tag_names + elements_with_attributes
+    # return all_elements
 
-    all_elements = elements_with_tag_names + elements_with_attributes
 
-    return all_elements
+"""
+# Define a function to check for clickable attributes
+def has_clickable_attribute(tag):
+    # has an attribute which is clickable. and also the
+
+    return any(tag.has_attr(attr) for attr in clickable_element_attr)
+"""
 
 
 def parse_html(html_string):
@@ -156,18 +165,42 @@ def remove_redundant_attr(html):
 
 
 # create a python list of pairs of locator and
-# selector values. for example 'title' and 'Select W Haircut'
+# selector values. for example 'title' and 'Select W
+# Haircut'
+# we need to make sure that
 def make_selector_locator_pairs(tags, page):
     locator_pairs = []
     for tag in tags:
         selector_locator = find_selector_locator(tag)
         if selector_locator is not None:
+            # we also want to find a class specifier for
+            # each tag. it will be indexed in the same
+            # location as the selector locator
+            # empty string is no class found
+            selector_locator = add_class_specifier(tag, selector_locator)
             selector_locator = add_date_if_exists(tag, selector_locator, page)
             locator_pairs.append(selector_locator)
+
     return locator_pairs
 
 
 date_pattern = re.compile(r"^(?:[1-9]|[12][0-9]|3[01])$")
+
+
+def add_class_specifier(tag, selector_locator):
+    if tag.has_attr("class"):
+        selector_locator = (
+            selector_locator[0],  # selector
+            selector_locator[1],  # locator
+            " ".join(tag["class"]),  # class specifier
+        )
+    else:
+        selector_locator = (
+            selector_locator[0],  # selector
+            selector_locator[1],  # locator
+            "",  # class specifier - empty string
+        )
+    return selector_locator
 
 
 def add_date_if_exists(tag, selector_locator, page):
@@ -178,9 +211,10 @@ def add_date_if_exists(tag, selector_locator, page):
             # add a string consisting of date and month to
             # end of selector locator
             selector_locator = (
-                selector_locator[0],
-                selector_locator[1],
-                tag.string.strip() + " " + month,
+                selector_locator[0],  # selector
+                selector_locator[1],  # locator
+                selector_locator[2],  # class
+                tag.string.strip() + " " + month,  # date
             )
     return selector_locator
 
@@ -190,6 +224,24 @@ def find_selector_locator(tag):
     if tag.has_attr("alt"):
         return ("alt", tag["alt"])
 
+    # find by href attribute
+    if tag.has_attr("href"):
+        return ("href", tag["href"])
+
+    # text
+    if tag.text is not None:
+        # make sure the text is not empty either
+        if tag.text.strip() != "":
+            return ("text", tag.text)
+
+    # now the cases for getting by placeholder
+    if tag.has_attr("placeholder"):
+        return ("placeholder", tag["placeholder"])
+
+    # title
+    if tag.has_attr("title"):
+        return ("title", tag["title"])
+
     # now the cases for getting by label. there are two ways
     # here
     if tag.has_attr("aria-label"):
@@ -197,21 +249,9 @@ def find_selector_locator(tag):
     if tag.name == "label":
         return ("label", tag.text)
 
-    # now the cases for getting by placeholder
-    if tag.has_attr("placeholder"):
-        return ("placeholder", tag["placeholder"])
-
     # test-id
     if tag.has_attr("data-testid"):
         return ("test-id", tag["data-testid"])
-
-    # title
-    if tag.has_attr("title"):
-        return ("title", tag["title"])
-
-    # text
-    if tag.text is not None:
-        return ("text", tag.text)
 
     else:
         return
@@ -228,9 +268,9 @@ def check_for_times(tags):
     return times_found
 
 
-def get_filtered_clickable_tags(page):
+async def get_filtered_clickable_tags(page):
     # first get the html
-    main_html = page.evaluate("document.documentElement.outerHTML")
+    main_html = await page.evaluate("document.documentElement.outerHTML")
     all_clickable_tags = get_clickable_elements_from_html(main_html)
     filtered_clickable_tags = filter_clickable_tags(all_clickable_tags)
     return filtered_clickable_tags
@@ -258,6 +298,8 @@ def filter_clickable_tags(all_clickable_tags):
             pass
         else:
             good_tags.append(tag)
+
+    return good_tags
 
 
 # testing only

@@ -34,6 +34,7 @@ def get_dynamic_selector(page, selector_type, locator):
         raise ValueError(f"Unsupported selector type: {selector_type}")
 
 
+"""
 if __name__ == "__main__":
 
     with sync_playwright() as p:
@@ -73,3 +74,4 @@ if __name__ == "__main__":
         time.sleep(10)
 
         driver.close()
+"""
